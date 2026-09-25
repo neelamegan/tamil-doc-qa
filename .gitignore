@@ -1,0 +1,14 @@
+# .gitignore
+.venv/
+__pycache__/
+*.pyc
+.idea/
+.DS_Store
+
+# data tracked by DVC, not git
+data/*
+!data/.gitignore
+*.dvc
+
+# but DO track the .dvc pointer files
+!data/raw_ocr.jsonl.dvc

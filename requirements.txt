@@ -1,0 +1,10 @@
+pymupdf
+pytesseract
+pillow
+fastembed
+faiss-cpu
+numpy
+fastapi
+uvicorn[standard]
+pydantic
+protobuf==3.20.3

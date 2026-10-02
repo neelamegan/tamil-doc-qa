@@ -1,14 +1,13 @@
-# .gitignore
 .venv/
 __pycache__/
 *.pyc
 .idea/
 .DS_Store
 
-# data tracked by DVC, not git
-data/*
-!data/.gitignore
-*.dvc
-
-# but DO track the .dvc pointer files
-!data/raw_ocr.jsonl.dvc
+# generated pipeline artifacts — rebuilt by the indexer job, not hand-committed
+data/raw_ocr.jsonl
+data/normalized.jsonl
+data/normalized_dropped.jsonl
+data/chunks.jsonl
+data/index.faiss
+data/meta.json

@@ -80,7 +80,7 @@ import json
 from pathlib import Path
 
 DPI = 300  # use whatever DPI you settled on as best in the last step
-OUT_PATH = Path("data/raw_ocr.jsonl")
+OUT_PATH = Path("../data/raw_ocr.jsonl")
 OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 doc = pymupdf.open("../data/Thirukkural_with_meaning.pdf")

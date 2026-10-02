@@ -1,6 +1,6 @@
 import json
 
-with open("data/raw_ocr.jsonl", encoding="utf-8") as f:
+with open("../data/raw_ocr.jsonl", encoding="utf-8") as f:
     records = [json.loads(l) for l in f]
 
 lengths = [len(r["text"]) for r in records]

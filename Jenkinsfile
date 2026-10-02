@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+    environment {
+        REGISTRY = "your-registry.example.com"
+        IMAGE = "tamil-doc-qa-server"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm   // pulls the exact commit GitHub triggered the build for
+            }
+        }
+        stage('Install & Test') {
+            steps {
+                sh '''
+                    python -m venv venv
+                    . venv/bin/activate
+                    pip install -r requirements.txt pytest httpx
+                    pytest tests/
+                '''
+            }
+        }
+        stage('Build Image') {
+            steps {
+                sh 'docker build -f Dockerfile.server -t ${REGISTRY}/${IMAGE}:${GIT_COMMIT} .'
+            }
+        }
+        stage('Smoke Test Container') {
+            steps {
+                sh '''
+                    docker run -d --name test-container -p 8000:8000 ${REGISTRY}/${IMAGE}:${GIT_COMMIT}
+                    sleep 5
+                    curl -f http://localhost:8000/health
+                    docker stop test-container && docker rm test-container
+                '''
+            }
+        }
+        stage('Push to Registry') {
+            when { branch 'main' }
+            steps {
+                sh 'docker push ${REGISTRY}/${IMAGE}:${GIT_COMMIT}'
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            when { branch 'main' }
+            steps {
+                sh 'kubectl set image deployment/tamil-doc-qa-server server=${REGISTRY}/${IMAGE}:${GIT_COMMIT} --record'
+            }
+        }
+    }
+    post {
+        failure {
+            echo 'Build failed — check logs above.'
+        }
+    }
+}

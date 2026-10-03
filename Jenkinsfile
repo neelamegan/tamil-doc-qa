@@ -32,14 +32,26 @@ pipeline {
                 sh '''
                     docker rm -f test-container || true
                     docker run -d --name test-container -p 8001:8000 neelamegan/tamil-doc-qa-server:${GIT_COMMIT}
-                    sleep 15
-                    docker ps -a
-                    docker logs test-container
-                    curl -f http://localhost:8001/health || (docker logs test-container && exit 1)
+
+                    echo "Waiting for container to become healthy..."
+                    for i in $(seq 1 30); do
+                        if curl -sf http://localhost:8001/health > /dev/null; then
+                            echo "Container is healthy after ${i}0 seconds"
+                            break
+                        fi
+                        if [ "$i" -eq 30 ]; then
+                            echo "Container failed to become healthy in time"
+                            docker logs test-container
+                            exit 1
+                        fi
+                        sleep 2
+                    done
+
+                    curl -f http://localhost:8001/health
                     docker stop test-container && docker rm test-container
-                   '''
-                  }
-               }
+                '''
+            }
+        }
         stage('Push to Docker Hub') {
             when { branch 'main' }
             steps {

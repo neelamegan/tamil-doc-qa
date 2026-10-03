@@ -1,0 +1,41 @@
+# k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tamil-doc-qa-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tamil-doc-qa
+  template:
+    metadata:
+      labels:
+        app: tamil-doc-qa
+    spec:
+      containers:
+        - name: server
+          image: neelamegan/tamil-doc-qa-server:latest
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 15
+          resources:
+            requests: { cpu: "500m", memory: "1Gi" }
+            limits: { cpu: "1", memory: "2Gi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tamil-doc-qa-service
+spec:
+  selector:
+    app: tamil-doc-qa
+  ports:
+    - port: 80
+      targetPort: 8000
+  type: ClusterIP

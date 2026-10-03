@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        REGISTRY = "your-registry.example.com"
+        DOCKERHUB_USER = "neelamegan"
         IMAGE = "tamil-doc-qa-server"
         PATH = "/usr/local/bin:${env.PATH}"   // adjust to match your `which docker` output
     }
@@ -23,15 +23,15 @@ pipeline {
         }
         stage('Build Image') {
             steps {
-                sh 'docker build -f Dockerfile.server -t ${REGISTRY}/${IMAGE}:${GIT_COMMIT} .'
+                sh 'docker build -f Dockerfile.server -t ${DOCKERHUB_USER}/${IMAGE}:${GIT_COMMIT} .'
             }
         }
         stage('Smoke Test Container') {
             steps {
                 sh '''
-                    docker run -d --name test-container -p 8000:8000 ${REGISTRY}/${IMAGE}:${GIT_COMMIT}
+                    docker run -d --name test-container -p 8000:8000 ${DOCKERHUB_USER}/${IMAGE}:${GIT_COMMIT}
                     sleep 5
-                    curl -f http://localhost:8000/health
+                    curl -f http://localhost:8001/health
                     docker stop test-container && docker rm test-container
                 '''
             }

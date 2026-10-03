@@ -30,13 +30,16 @@ pipeline {
         stage('Smoke Test Container') {
             steps {
                 sh '''
+                    docker rm -f test-container || true
                     docker run -d --name test-container -p 8001:8000 neelamegan/tamil-doc-qa-server:${GIT_COMMIT}
-                    sleep 8
-                    curl -f http://localhost:8001/health
+                    sleep 15
+                    docker ps -a
+                    docker logs test-container
+                    curl -f http://localhost:8001/health || (docker logs test-container && exit 1)
                     docker stop test-container && docker rm test-container
-                '''
-            }
-        }
+                   '''
+                  }
+               }
         stage('Push to Docker Hub') {
             when { branch 'main' }
             steps {

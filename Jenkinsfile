@@ -3,6 +3,7 @@ pipeline {
     environment {
         REGISTRY = "your-registry.example.com"
         IMAGE = "tamil-doc-qa-server"
+        PATH = "/usr/local/bin:${env.PATH}"   // adjust to match your `which docker` output
     }
     stages {
         stage('Checkout') {

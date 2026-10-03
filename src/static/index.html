@@ -1,0 +1,100 @@
+<!-- src/static/index.html -->
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>திருக்குறள் வினா-விடை</title>
+    <style>
+        body {
+            font-family: 'Noto Sans Tamil', 'Latha', sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #fdfaf4;
+            color: #222;
+        }
+        h1 { font-size: 1.4rem; text-align: center; }
+        #q {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            background: #8b4513;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:disabled { opacity: 0.6; cursor: default; }
+        .result {
+            margin-top: 20px;
+            padding: 14px;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .meta { color: #888; font-size: 0.85rem; margin-bottom: 6px; }
+        #status { color: #888; font-size: 0.9rem; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<h1>திருக்குறள் வினா-விடை (Thirukkural Q&A)</h1>
+<input type="text" id="q" placeholder="உங்கள் கேள்வியை தமிழில் தட்டச்சு செய்யவும்..." />
+<button id="askBtn" onclick="ask()">கேள்வி கேளுங்கள்</button>
+<div id="status"></div>
+<div id="results"></div>
+
+<script>
+    async function ask() {
+        const q = document.getElementById('q').value.trim();
+        if (!q) return;
+
+        const btn = document.getElementById('askBtn');
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+
+        btn.disabled = true;
+        status.textContent = "தேடுகிறது...";
+        results.innerHTML = "";
+
+        try {
+            const res = await fetch('/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: q, k: 5 })
+            });
+            if (!res.ok) throw new Error("Server error: " + res.status);
+            const data = await res.json();
+
+            status.textContent = `${data.results.length} முடிவுகள் கிடைத்தன`;
+            data.results.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'result';
+                div.innerHTML = `<div class="meta">பக்கம் ${r.page} · பொருத்தம் ${(r.score*100).toFixed(1)}%</div>${r.text}`;
+                results.appendChild(div);
+            });
+        } catch (err) {
+            status.textContent = "பிழை: " + err.message;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    document.getElementById('q').addEventListener('keydown', e => {
+        if (e.key === 'Enter') ask();
+    });
+</script>
+</body>
+</html>

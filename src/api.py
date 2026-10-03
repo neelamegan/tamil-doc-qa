@@ -37,3 +37,15 @@ def query(q: Query):
         for i, s in zip(idxs[0], scores[0])
     ]
     return {"question": q.question, "results": results}
+
+# src/api.py — add these imports and lines
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+# ... your existing app = FastAPI(...) and model/index loading stays as-is ...
+
+app.mount("/static", StaticFiles(directory="src/static"), name="static")
+
+@app.get("/")
+def serve_ui():
+    return FileResponse("src/static/index.html")
